@@ -262,35 +262,6 @@ const nodeData = {
 }
 ```
 
-## Integration with Your Neo4j System
-
-Since you already have a Neo4j MCP server integrated in your system (`chatWithGraphMCP.ts`), you can now combine both servers:
-
-1. **Query Neo4j**: Use your existing neo4j-query MCP server to execute Cypher queries
-2. **Visualize Results**: Use the neo4j-visualizer MCP server to create visualizations from the query results
-
-### Example Workflow:
-
-1. Execute a Cypher query using your Neo4j MCP server:
-   ```cypher
-   MATCH (p:Person)-[r:KNOWS]->(f:Person)
-   RETURN p, r, f
-   ```
-
-2. Take the results and pass them to the visualizer:
-   ```javascript
-   // The query results would be in the format expected by the visualizer
-   {
-     "data": {
-       "nodes": [...], // nodes from your query
-       "relationships": [...] // relationships from your query
-     },
-     "type": "graph",
-     "title": "Person Relationships",
-     "outputPath": "/path/to/visualization.html"
-   }
-   ```
-
 ## Extending the Visualizer
 
 The server is designed to be extensible. You can:
