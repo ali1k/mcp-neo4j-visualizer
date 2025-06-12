@@ -9,6 +9,20 @@ This MCP server provides visualization tools for Neo4j query results, allowing y
 - **Charts**: Create basic chart visualizations (extensible)
 - **Timelines**: Create timeline visualizations (extensible)
 
+
+## How to Use
+
+```
+{
+  mcpServers: {
+    "neo4j-visualizer": {
+      "command": "npx",
+      "args": ["mcp-neo4j-visualizer"]
+    }
+  }
+}
+```
+
 ## Available Tools
 
 ### 1. `visualize_neo4j_results`
