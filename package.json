@@ -1,0 +1,32 @@
+{
+  "name": "neo4j-visualizer",
+  "version": "0.1.0",
+  "description": "A Model Context Protocol server",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "neo4j-visualizer": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "0.6.0",
+    "canvas": "^3.1.0",
+    "d3": "^7.9.0",
+    "html2canvas": "^1.4.1",
+    "jsdom": "^26.1.0"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  }
+}
