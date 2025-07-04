@@ -5,6 +5,7 @@ This MCP server provides visualization tools for Neo4j query results, allowing y
 ## Features
 
 - **Interactive Graph Networks**: Create D3.js-powered network visualizations of nodes and relationships
+- **ReactFlow Lineage Visualizations**: Advanced lineage diagrams with hierarchical grouping, filtering, and interactive exploration
 - **Data Tables**: Generate formatted HTML tables from query records
 - **Charts**: Create intelligent, interactive chart visualizations with automatic type detection
 - **Timelines**: Create timeline visualizations (extensible)
@@ -71,6 +72,25 @@ Get processed data and D3.js code for direct integration into existing React com
 **Parameters:**
 - `data` (required): Neo4j query results
 - `type` (required): Visualization type ('graph', 'table', 'chart', 'timeline')
+
+### 6. `create_reactflow_lineage`
+Create interactive ReactFlow-based lineage visualizations with advanced features for data lineage exploration.
+
+**Parameters:**
+- `nodes` (required): Array of Neo4j nodes
+- `relationships` (required): Array of Neo4j relationships
+- `lineageConfig` (optional): Configuration object for lineage visualization
+  - `direction` (optional): Layout direction ('LR', 'TB', 'RL', 'BT') - default: 'LR'
+  - `groupByProperty` (optional): Property name to group nodes by (creates parent-child relationships)
+  - `showHierarchy` (optional): Enable hierarchical parent-child grouping - default: true
+  - `enableFiltering` (optional): Enable node/edge type filtering - default: true
+  - `enableExpansion` (optional): Enable expand/collapse functionality - default: true
+  - `nodeSpacing` (optional): Spacing between nodes in pixels - default: 100
+  - `rankSpacing` (optional): Spacing between ranks/levels in pixels - default: 150
+- `title` (optional): Title for the visualization (default: 'Neo4j ReactFlow Lineage')
+- `width` (optional): Width in pixels (default: 1200)
+- `height` (optional): Height in pixels (default: 800)
+- `outputPath` (optional): File path to save the HTML visualization
 
 ## Chart Visualization Features
 
@@ -219,7 +239,113 @@ const records = [
 }
 ```
 
-### Example 3: Creating Interactive Charts
+### Example 3: Creating ReactFlow Lineage Visualizations
+
+```javascript
+// Sample data for database schema lineage
+const lineageData = {
+  nodes: [
+    {
+      id: "1",
+      labels: ["Database"],
+      properties: {
+        name: "ProductionDB",
+        type: "PostgreSQL",
+        environment: "production"
+      }
+    },
+    {
+      id: "2",
+      labels: ["Table"],
+      properties: {
+        name: "users",
+        database: "ProductionDB",
+        schema: "public"
+      }
+    },
+    {
+      id: "3",
+      labels: ["Table"],
+      properties: {
+        name: "orders",
+        database: "ProductionDB",
+        schema: "public"
+      }
+    },
+    {
+      id: "4",
+      labels: ["Column"],
+      properties: {
+        name: "user_id",
+        table: "users",
+        type: "integer",
+        primary_key: true
+      }
+    }
+  ],
+  relationships: [
+    {
+      id: "r1",
+      type: "CONTAINS",
+      startNodeId: "1",
+      endNodeId: "2",
+      properties: {}
+    },
+    {
+      id: "r2",
+      type: "CONTAINS",
+      startNodeId: "1",
+      endNodeId: "3",
+      properties: {}
+    },
+    {
+      id: "r3",
+      type: "HAS_COLUMN",
+      startNodeId: "2",
+      endNodeId: "4",
+      properties: {}
+    }
+  ]
+};
+
+// Use the create_reactflow_lineage tool:
+{
+  "nodes": lineageData.nodes,
+  "relationships": lineageData.relationships,
+  "lineageConfig": {
+    "direction": "LR",
+    "groupByProperty": "database",
+    "showHierarchy": true,
+    "enableFiltering": true,
+    "enableExpansion": true,
+    "nodeSpacing": 120,
+    "rankSpacing": 180
+  },
+  "title": "Database Schema Lineage",
+  "width": 1400,
+  "height": 900,
+  "outputPath": "/path/to/schema_lineage.html"
+}
+```
+
+### ReactFlow Lineage Features
+
+The ReactFlow lineage visualization provides advanced features for exploring complex data relationships:
+
+- **Hierarchical Grouping**: Automatically groups related nodes (e.g., tables within databases)
+- **Interactive Filtering**: Filter nodes and edges by type with real-time statistics
+- **Expand/Collapse**: Show or hide grouped items for better overview
+- **Drag & Drop**: Rearrange nodes for optimal layout
+- **Node Details Panel**: Click any node to see detailed properties
+- **Minimap Navigation**: Overview map for large graphs
+- **Zoom Controls**: Smooth zooming and panning
+- **Download Functionality**: Export visualization as SVG
+- **Responsive Design**: Adapts to different screen sizes
+- **Custom Node Types**: Different visual styles for different node types
+- **Edge Labels**: Relationship types displayed on connections
+- **Color Coding**: Consistent colors for node types with legend
+
+### Example 4: Creating Interactive Charts
 
 ```javascript
 // Example 1: Sales data (creates bar chart)
