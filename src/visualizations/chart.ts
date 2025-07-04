@@ -220,309 +220,439 @@ export class ChartVisualization extends BaseVisualization {
   }
 
   private createChartVisualization(data: any, title: string, width: number, height: number, chartData: any[], chartType: string): string {
-    return `
-<!DOCTYPE html>
-<html>
+    return `<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 20px; 
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
             background-color: #f8f9fa;
+            overflow: hidden;
+        }
+        #root {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .iframe-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+        }
+        .iframe-header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .iframe-header p {
+            margin: 4px 0 0 0;
+            font-size: 13px;
+            opacity: 0.9;
         }
         .chart-container {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
             background: white;
+            margin: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin: 20px 0;
-        }
-        .bar { 
-            fill: steelblue; 
-            transition: fill 0.3s ease;
-        }
-        .bar:hover { 
-            fill: #ff6b35; 
-            cursor: pointer;
-        }
-        .line {
-            fill: none;
-            stroke: steelblue;
-            stroke-width: 2px;
-        }
-        .dot {
-            fill: steelblue;
-            stroke: white;
-            stroke-width: 2px;
-        }
-        .dot:hover {
-            fill: #ff6b35;
-            r: 6;
-            cursor: pointer;
-        }
-        .pie-slice {
-            stroke: white;
-            stroke-width: 2px;
-            cursor: pointer;
-        }
-        .pie-slice:hover {
-            opacity: 0.8;
-        }
-        .axis { 
-            font-size: 12px; 
-        }
-        .axis-label {
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .chart-title {
-            font-size: 18px;
-            font-weight: bold;
-            text-anchor: middle;
-            fill: #333;
-        }
-        .tooltip { 
-            position: absolute; 
-            padding: 12px; 
-            background: rgba(0,0,0,0.9); 
-            color: white; 
-            border-radius: 6px; 
-            pointer-events: none; 
-            opacity: 0;
-            font-size: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            transition: opacity 0.3s ease;
-        }
-        .legend {
-            font-size: 12px;
-        }
-        .legend-item {
-            cursor: pointer;
-        }
-        .legend-item:hover {
-            opacity: 0.7;
         }
         .chart-info {
             background: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             font-size: 14px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .chart-canvas {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+            position: relative;
+            overflow: hidden;
+        }
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .legend {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+        .chart-stats {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
-    <h1>${title}</h1>
-    <div class="chart-container">
-        <div class="chart-info">
-            <strong>Chart Type:</strong> ${chartType} | 
-            <strong>Data Points:</strong> ${chartData.length}
+    <div id="root">
+        <div class="iframe-header">
+            <h1>${title}</h1>
+            <p>📊 ${chartType.charAt(0).toUpperCase() + chartType.slice(1)} chart • ${chartData.length} data points</p>
         </div>
-        <div id="chart"></div>
+        <div class="chart-container">
+            <div class="chart-info">
+                <div><strong>Chart Type:</strong> ${chartType.charAt(0).toUpperCase() + chartType.slice(1)}</div>
+                <div><strong>Data Points:</strong> ${chartData.length}</div>
+                <div><strong>Value Range:</strong> ${Math.min(...chartData.map(d => d.value))} - ${Math.max(...chartData.map(d => d.value))}</div>
+            </div>
+            
+            <div class="chart-canvas" id="chartCanvas">
+                <!-- Chart will be rendered here -->
+            </div>
+            
+            <div class="legend">
+                <h4 style="margin-top: 0; color: #333;">🏷️ Legend</h4>
+                <div class="legend-items" id="legendItems">
+                    <!-- Legend items will be generated here -->
+                </div>
+            </div>
+            
+            <div class="chart-stats">
+                <h4 style="margin-top: 0; color: #1976d2;">📈 Statistics</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div><strong>Total Value:</strong> ${chartData.reduce((sum, d) => sum + d.value, 0)}</div>
+                    <div><strong>Average:</strong> ${(chartData.reduce((sum, d) => sum + d.value, 0) / chartData.length).toFixed(2)}</div>
+                    <div><strong>Max Value:</strong> ${Math.max(...chartData.map(d => d.value))}</div>
+                    <div><strong>Min Value:</strong> ${Math.min(...chartData.map(d => d.value))}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tooltip" id="tooltip"></div>
     </div>
-    <div class="tooltip" id="tooltip"></div>
     
     <script>
         const rawData = ${JSON.stringify(data)};
         const chartData = ${JSON.stringify(chartData)};
         const chartType = "${chartType}";
-        const width = ${width};
-        const height = ${height};
         
-        console.log('Raw data:', rawData);
-        console.log('Processed chart data:', chartData);
-        console.log('Chart type:', chartType);
+        // Color palette
+        const colors = ['#00B5AD', '#FF6B35', '#F7931E', '#FFD23F', '#EE5A24', '#5F27CD', '#00D2D3', '#FF9FF3', '#54A0FF', '#5F27CD'];
         
-        // Create the appropriate chart based on type
-        switch(chartType) {
-            case 'bar':
-                createBarChart();
-                break;
-            case 'pie':
-                createPieChart();
-                break;
-            case 'line':
-                createLineChart();
-                break;
-            case 'scatter':
-                createScatterPlot();
-                break;
-            case 'histogram':
-                createHistogram();
-                break;
-            default:
-                createBarChart(); // Default to bar chart
-        }
-        
-        function createBarChart() {
-            const margin = {top: 60, right: 30, bottom: 80, left: 80};
-            const innerWidth = width - margin.left - margin.right;
-            const innerHeight = height - margin.top - margin.bottom;
+        function createChart() {
+            const canvas = document.getElementById('chartCanvas');
+            const tooltip = document.getElementById('tooltip');
             
-            const svg = d3.select("#chart")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
-                
-            const g = svg.append("g")
-                .attr("transform", \`translate(\${margin.left},\${margin.top})\`);
+            // Clear canvas
+            canvas.innerHTML = '';
             
-            // Add title
-            svg.append("text")
-                .attr("class", "chart-title")
-                .attr("x", width / 2)
-                .attr("y", 30)
-                .text("${title}");
-            
-            const xScale = d3.scaleBand()
-                .domain(chartData.map(d => d.label))
-                .range([0, innerWidth])
-                .padding(0.1);
-                
-            const yScale = d3.scaleLinear()
-                .domain([0, d3.max(chartData, d => d.value)])
-                .nice()
-                .range([innerHeight, 0]);
-            
-            const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-            
-            // Add bars
-            g.selectAll(".bar")
-                .data(chartData)
-                .enter().append("rect")
-                .attr("class", "bar")
-                .attr("x", d => xScale(d.label))
-                .attr("width", xScale.bandwidth())
-                .attr("y", d => yScale(d.value))
-                .attr("height", d => innerHeight - yScale(d.value))
-                .attr("fill", (d, i) => colorScale(i))
-                .on("mouseover", handleMouseOver)
-                .on("mouseout", handleMouseOut);
-            
-            // Add x axis
-            g.append("g")
-                .attr("class", "axis")
-                .attr("transform", \`translate(0,\${innerHeight})\`)
-                .call(d3.axisBottom(xScale))
-                .selectAll("text")
-                .style("text-anchor", "end")
-                .attr("dx", "-.8em")
-                .attr("dy", ".15em")
-                .attr("transform", "rotate(-45)");
-            
-            // Add y axis
-            g.append("g")
-                .attr("class", "axis")
-                .call(d3.axisLeft(yScale));
-            
-            // Add axis labels
-            g.append("text")
-                .attr("class", "axis-label")
-                .attr("transform", "rotate(-90)")
-                .attr("y", 0 - margin.left)
-                .attr("x", 0 - (innerHeight / 2))
-                .attr("dy", "1em")
-                .style("text-anchor", "middle")
-                .text("Value");
-            
-            g.append("text")
-                .attr("class", "axis-label")
-                .attr("transform", \`translate(\${innerWidth / 2}, \${innerHeight + margin.bottom - 10})\`)
-                .style("text-anchor", "middle")
-                .text("Category");
-        }
-        
-        function createPieChart() {
-            const radius = Math.min(width, height) / 2 - 40;
-            
-            const svg = d3.select("#chart")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
-            
-            const g = svg.append("g")
-                .attr("transform", \`translate(\${width/2},\${height/2})\`);
-            
-            // Add title
-            svg.append("text")
-                .attr("class", "chart-title")
-                .attr("x", width / 2)
-                .attr("y", 30)
-                .text("${title}");
-            
-            const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-            
-            const pie = d3.pie()
-                .value(d => d.value)
-                .sort(null);
-            
-            const arc = d3.arc()
-                .innerRadius(0)
-                .outerRadius(radius);
-            
-            const arcs = g.selectAll(".pie-slice")
-                .data(pie(chartData))
-                .enter().append("g")
-                .attr("class", "pie-slice");
-            
-            arcs.append("path")
-                .attr("d", arc)
-                .attr("fill", (d, i) => colorScale(i))
-                .on("mouseover", handleMouseOver)
-                .on("mouseout", handleMouseOut);
-            
-            // Add labels
-            arcs.append("text")
-                .attr("transform", d => \`translate(\${arc.centroid(d)})\`)
-                .attr("text-anchor", "middle")
-                .attr("font-size", "12px")
-                .text(d => d.data.label);
-            
-            // Add legend
-            const legend = svg.append("g")
-                .attr("class", "legend")
-                .attr("transform", \`translate(\${width - 120}, 50)\`);
-            
-            const legendItems = legend.selectAll(".legend-item")
-                .data(chartData)
-                .enter().append("g")
-                .attr("class", "legend-item")
-                .attr("transform", (d, i) => \`translate(0, \${i * 20})\`);
-            
-            legendItems.append("rect")
-                .attr("width", 15)
-                .attr("height", 15)
-                .attr("fill", (d, i) => colorScale(i));
-            
-            legendItems.append("text")
-                .attr("x", 20)
-                .attr("y", 12)
-                .text(d => d.label);
-        }
-        
-        function handleMouseOver(event, d) {
-            const tooltip = d3.select("#tooltip");
-            tooltip.transition().duration(200).style("opacity", .9);
-            
-            let tooltipContent = '';
-            if (d.data) { // For pie chart
-                tooltipContent = \`<strong>\${d.data.label}</strong><br/>Value: \${d.data.value}\`;
-            } else {
-                tooltipContent = \`<strong>\${d.label}</strong><br/>Value: \${d.value}\`;
-                if (d.x !== undefined) tooltipContent += \`<br/>X: \${d.x}\`;
-                if (d.y !== undefined) tooltipContent += \`<br/>Y: \${d.y}\`;
+            switch(chartType) {
+                case 'bar':
+                    createBarChart(canvas, tooltip);
+                    break;
+                case 'pie':
+                    createPieChart(canvas, tooltip);
+                    break;
+                case 'line':
+                    createLineChart(canvas, tooltip);
+                    break;
+                default:
+                    createBarChart(canvas, tooltip);
             }
             
-            tooltip.html(tooltipContent)
-                .style("left", (event.pageX + 10) + "px")
-                .style("top", (event.pageY - 28) + "px");
+            createLegend();
         }
         
-        function handleMouseOut() {
-            d3.select("#tooltip").transition().duration(500).style("opacity", 0);
+        function createBarChart(canvas, tooltip) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.style.width = '100%';
+            svg.style.height = '100%';
+            
+            const rect = canvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            const margin = { top: 20, right: 20, bottom: 60, left: 60 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+            
+            // Calculate scales
+            const maxValue = Math.max(...chartData.map(d => d.value));
+            const barWidth = chartWidth / chartData.length * 0.8;
+            const barSpacing = chartWidth / chartData.length * 0.2;
+            
+            chartData.forEach((d, i) => {
+                const x = margin.left + i * (barWidth + barSpacing) + barSpacing / 2;
+                const barHeight = (d.value / maxValue) * chartHeight;
+                const y = margin.top + chartHeight - barHeight;
+                
+                // Create bar
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', x);
+                rect.setAttribute('y', y);
+                rect.setAttribute('width', barWidth);
+                rect.setAttribute('height', barHeight);
+                rect.setAttribute('fill', colors[i % colors.length]);
+                rect.style.cursor = 'pointer';
+                rect.style.transition = 'opacity 0.3s ease';
+                
+                // Add hover effects
+                rect.addEventListener('mouseenter', (e) => {
+                    rect.style.opacity = '0.8';
+                    showTooltip(e, d, tooltip);
+                });
+                rect.addEventListener('mouseleave', () => {
+                    rect.style.opacity = '1';
+                    hideTooltip(tooltip);
+                });
+                
+                svg.appendChild(rect);
+                
+                // Add label
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', x + barWidth / 2);
+                text.setAttribute('y', margin.top + chartHeight + 20);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('font-size', '12');
+                text.setAttribute('fill', '#666');
+                text.textContent = d.label.length > 10 ? d.label.substring(0, 10) + '...' : d.label;
+                svg.appendChild(text);
+                
+                // Add value label on bar
+                const valueText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                valueText.setAttribute('x', x + barWidth / 2);
+                valueText.setAttribute('y', y - 5);
+                valueText.setAttribute('text-anchor', 'middle');
+                valueText.setAttribute('font-size', '11');
+                valueText.setAttribute('font-weight', 'bold');
+                valueText.setAttribute('fill', '#333');
+                valueText.textContent = d.value;
+                svg.appendChild(valueText);
+            });
+            
+            canvas.appendChild(svg);
         }
+        
+        function createPieChart(canvas, tooltip) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.style.width = '100%';
+            svg.style.height = '100%';
+            
+            const rect = canvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) / 2 - 40;
+            
+            const total = chartData.reduce((sum, d) => sum + d.value, 0);
+            let currentAngle = 0;
+            
+            chartData.forEach((d, i) => {
+                const sliceAngle = (d.value / total) * 2 * Math.PI;
+                const startAngle = currentAngle;
+                const endAngle = currentAngle + sliceAngle;
+                
+                // Create pie slice path
+                const largeArcFlag = sliceAngle > Math.PI ? 1 : 0;
+                const x1 = centerX + radius * Math.cos(startAngle);
+                const y1 = centerY + radius * Math.sin(startAngle);
+                const x2 = centerX + radius * Math.cos(endAngle);
+                const y2 = centerY + radius * Math.sin(endAngle);
+                
+                const pathData = [
+                    \`M \${centerX} \${centerY}\`,
+                    \`L \${x1} \${y1}\`,
+                    \`A \${radius} \${radius} 0 \${largeArcFlag} 1 \${x2} \${y2}\`,
+                    'Z'
+                ].join(' ');
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('fill', colors[i % colors.length]);
+                path.setAttribute('stroke', 'white');
+                path.setAttribute('stroke-width', '2');
+                path.style.cursor = 'pointer';
+                path.style.transition = 'opacity 0.3s ease';
+                
+                // Add hover effects
+                path.addEventListener('mouseenter', (e) => {
+                    path.style.opacity = '0.8';
+                    showTooltip(e, d, tooltip);
+                });
+                path.addEventListener('mouseleave', () => {
+                    path.style.opacity = '1';
+                    hideTooltip(tooltip);
+                });
+                
+                svg.appendChild(path);
+                
+                // Add percentage label
+                const labelAngle = startAngle + sliceAngle / 2;
+                const labelRadius = radius * 0.7;
+                const labelX = centerX + labelRadius * Math.cos(labelAngle);
+                const labelY = centerY + labelRadius * Math.sin(labelAngle);
+                const percentage = ((d.value / total) * 100).toFixed(1);
+                
+                if (percentage > 5) { // Only show label if slice is large enough
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', labelX);
+                    text.setAttribute('y', labelY);
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('font-size', '12');
+                    text.setAttribute('font-weight', 'bold');
+                    text.setAttribute('fill', 'white');
+                    text.textContent = percentage + '%';
+                    svg.appendChild(text);
+                }
+                
+                currentAngle += sliceAngle;
+            });
+            
+            canvas.appendChild(svg);
+        }
+        
+        function createLineChart(canvas, tooltip) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.style.width = '100%';
+            svg.style.height = '100%';
+            
+            const rect = canvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            const margin = { top: 20, right: 20, bottom: 60, left: 60 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+            
+            const maxValue = Math.max(...chartData.map(d => d.value));
+            const minValue = Math.min(...chartData.map(d => d.value));
+            const valueRange = maxValue - minValue || 1;
+            
+            // Create line path
+            let pathData = '';
+            chartData.forEach((d, i) => {
+                const x = margin.left + (i / (chartData.length - 1)) * chartWidth;
+                const y = margin.top + chartHeight - ((d.value - minValue) / valueRange) * chartHeight;
+                
+                if (i === 0) {
+                    pathData += \`M \${x} \${y}\`;
+                } else {
+                    pathData += \` L \${x} \${y}\`;
+                }
+                
+                // Add data point
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', x);
+                circle.setAttribute('cy', y);
+                circle.setAttribute('r', 4);
+                circle.setAttribute('fill', colors[0]);
+                circle.setAttribute('stroke', 'white');
+                circle.setAttribute('stroke-width', 2);
+                circle.style.cursor = 'pointer';
+                
+                circle.addEventListener('mouseenter', (e) => {
+                    circle.setAttribute('r', 6);
+                    showTooltip(e, d, tooltip);
+                });
+                circle.addEventListener('mouseleave', () => {
+                    circle.setAttribute('r', 4);
+                    hideTooltip(tooltip);
+                });
+                
+                svg.appendChild(circle);
+            });
+            
+            // Add line
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', colors[0]);
+            path.setAttribute('stroke-width', 3);
+            svg.appendChild(path);
+            
+            canvas.appendChild(svg);
+        }
+        
+        function createLegend() {
+            const legendContainer = document.getElementById('legendItems');
+            legendContainer.innerHTML = '';
+            
+            chartData.forEach((d, i) => {
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                
+                const colorBox = document.createElement('div');
+                colorBox.className = 'legend-color';
+                colorBox.style.backgroundColor = colors[i % colors.length];
+                
+                const label = document.createElement('span');
+                label.textContent = d.label;
+                label.style.fontSize = '14px';
+                
+                item.appendChild(colorBox);
+                item.appendChild(label);
+                legendContainer.appendChild(item);
+            });
+        }
+        
+        function showTooltip(event, data, tooltip) {
+            tooltip.style.opacity = '1';
+            tooltip.innerHTML = \`<strong>\${data.label}</strong><br/>Value: \${data.value}\`;
+            tooltip.style.left = (event.pageX + 10) + 'px';
+            tooltip.style.top = (event.pageY - 10) + 'px';
+        }
+        
+        function hideTooltip(tooltip) {
+            tooltip.style.opacity = '0';
+        }
+        
+        // Initialize chart
+        createChart();
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            setTimeout(createChart, 100);
+        });
     </script>
 </body>
 </html>`;
