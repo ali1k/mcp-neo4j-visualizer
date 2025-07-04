@@ -94,9 +94,19 @@ class Neo4jVisualizerServer {
                       type: 'object',
                       properties: {
                         id: { type: 'string' },
-                        labels: { type: 'array', items: { type: 'string' } },
-                        properties: { type: 'object' }
-                      }
+                        labels: { 
+                          type: 'array', 
+                          items: { type: 'string' },
+                          description: 'Node labels'
+                        },
+                        properties: { 
+                          type: 'object',
+                          description: 'Node properties',
+                          additionalProperties: true
+                        }
+                      },
+                      required: ['id', 'labels', 'properties'],
+                      additionalProperties: false
                     }
                   },
                   relationships: {
@@ -109,13 +119,24 @@ class Neo4jVisualizerServer {
                         type: { type: 'string' },
                         startNodeId: { type: 'string' },
                         endNodeId: { type: 'string' },
-                        properties: { type: 'object' }
-                      }
+                        properties: { 
+                          type: 'object',
+                          description: 'Relationship properties',
+                          additionalProperties: true
+                        }
+                      },
+                      required: ['id', 'type', 'startNodeId', 'endNodeId', 'properties'],
+                      additionalProperties: false
                     }
                   },
                   records: {
                     type: 'array',
-                    description: 'Array of query result records'
+                    description: 'Array of query result records',
+                    items: {
+                      type: 'object',
+                      description: 'Query result record',
+                      additionalProperties: true
+                    }
                   }
                 }
               },
@@ -160,9 +181,19 @@ class Neo4jVisualizerServer {
                   type: 'object',
                   properties: {
                     id: { type: 'string' },
-                    labels: { type: 'array', items: { type: 'string' } },
-                    properties: { type: 'object' }
-                  }
+                    labels: { 
+                      type: 'array', 
+                      items: { type: 'string' },
+                      description: 'Node labels'
+                    },
+                    properties: { 
+                      type: 'object',
+                      description: 'Node properties',
+                      additionalProperties: true
+                    }
+                  },
+                  required: ['id', 'labels', 'properties'],
+                  additionalProperties: false
                 }
               },
               relationships: {
@@ -175,8 +206,14 @@ class Neo4jVisualizerServer {
                     type: { type: 'string' },
                     startNodeId: { type: 'string' },
                     endNodeId: { type: 'string' },
-                    properties: { type: 'object' }
-                  }
+                    properties: { 
+                      type: 'object',
+                      description: 'Relationship properties',
+                      additionalProperties: true
+                    }
+                  },
+                  required: ['id', 'type', 'startNodeId', 'endNodeId', 'properties'],
+                  additionalProperties: false
                 }
               },
               title: { type: 'string', default: 'Neo4j Graph Network' },
@@ -195,7 +232,12 @@ class Neo4jVisualizerServer {
             properties: {
               records: {
                 type: 'array',
-                description: 'Array of query result records'
+                description: 'Array of query result records',
+                items: {
+                  type: 'object',
+                  description: 'Query result record',
+                  additionalProperties: true
+                }
               },
               title: { type: 'string', default: 'Neo4j Query Results' },
               outputPath: { type: 'string' }
@@ -211,7 +253,61 @@ class Neo4jVisualizerServer {
             properties: {
               data: {
                 type: 'object',
-                description: 'Neo4j query results containing nodes, relationships, or records'
+                description: 'Neo4j query results containing nodes, relationships, or records',
+                properties: {
+                  nodes: {
+                    type: 'array',
+                    description: 'Array of Neo4j nodes',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        labels: { 
+                          type: 'array', 
+                          items: { type: 'string' },
+                          description: 'Node labels'
+                        },
+                        properties: { 
+                          type: 'object',
+                          description: 'Node properties',
+                          additionalProperties: true
+                        }
+                      },
+                      required: ['id', 'labels', 'properties'],
+                      additionalProperties: false
+                    }
+                  },
+                  relationships: {
+                    type: 'array',
+                    description: 'Array of Neo4j relationships',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        type: { type: 'string' },
+                        startNodeId: { type: 'string' },
+                        endNodeId: { type: 'string' },
+                        properties: { 
+                          type: 'object',
+                          description: 'Relationship properties',
+                          additionalProperties: true
+                        }
+                      },
+                      required: ['id', 'type', 'startNodeId', 'endNodeId', 'properties'],
+                      additionalProperties: false
+                    }
+                  },
+                  records: {
+                    type: 'array',
+                    description: 'Array of query result records',
+                    items: {
+                      type: 'object',
+                      description: 'Query result record',
+                      additionalProperties: true
+                    }
+                  }
+                },
+                additionalProperties: false
               },
               type: {
                 type: 'string',
@@ -237,7 +333,61 @@ class Neo4jVisualizerServer {
             properties: {
               data: {
                 type: 'object',
-                description: 'Neo4j query results containing nodes, relationships, or records'
+                description: 'Neo4j query results containing nodes, relationships, or records',
+                properties: {
+                  nodes: {
+                    type: 'array',
+                    description: 'Array of Neo4j nodes',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        labels: { 
+                          type: 'array', 
+                          items: { type: 'string' },
+                          description: 'Node labels'
+                        },
+                        properties: { 
+                          type: 'object',
+                          description: 'Node properties',
+                          additionalProperties: true
+                        }
+                      },
+                      required: ['id', 'labels', 'properties'],
+                      additionalProperties: false
+                    }
+                  },
+                  relationships: {
+                    type: 'array',
+                    description: 'Array of Neo4j relationships',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string' },
+                        type: { type: 'string' },
+                        startNodeId: { type: 'string' },
+                        endNodeId: { type: 'string' },
+                        properties: { 
+                          type: 'object',
+                          description: 'Relationship properties',
+                          additionalProperties: true
+                        }
+                      },
+                      required: ['id', 'type', 'startNodeId', 'endNodeId', 'properties'],
+                      additionalProperties: false
+                    }
+                  },
+                  records: {
+                    type: 'array',
+                    description: 'Array of query result records',
+                    items: {
+                      type: 'object',
+                      description: 'Query result record',
+                      additionalProperties: true
+                    }
+                  }
+                },
+                additionalProperties: false
               },
               type: {
                 type: 'string',
