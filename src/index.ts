@@ -397,6 +397,227 @@ class Neo4jVisualizerServer {
             },
             required: ['data', 'type']
           }
+        },
+        {
+          name: 'create_3d_graph_network',
+          description: 'Create an immersive 3D network graph visualization using Three.js and React-Three-Fiber',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              nodes: {
+                type: 'array',
+                description: 'Array of Neo4j nodes',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    labels: { 
+                      type: 'array', 
+                      items: { type: 'string' },
+                      description: 'Node labels'
+                    },
+                    properties: { 
+                      type: 'object',
+                      description: 'Node properties',
+                      additionalProperties: true
+                    }
+                  },
+                  required: ['id', 'labels', 'properties'],
+                  additionalProperties: false
+                }
+              },
+              relationships: {
+                type: 'array',
+                description: 'Array of Neo4j relationships',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    type: { type: 'string' },
+                    startNodeId: { type: 'string' },
+                    endNodeId: { type: 'string' },
+                    properties: { 
+                      type: 'object',
+                      description: 'Relationship properties',
+                      additionalProperties: true
+                    }
+                  },
+                  required: ['id', 'type', 'startNodeId', 'endNodeId', 'properties'],
+                  additionalProperties: false
+                }
+              },
+              title: { type: 'string', default: '3D Neo4j Graph Network' },
+              enablePhysics: { type: 'boolean', default: true },
+              enableVR: { type: 'boolean', default: false },
+              nodeSize: { type: 'number', default: 1 },
+              linkDistance: { type: 'number', default: 30 }
+            },
+            required: ['nodes', 'relationships']
+          }
+        },
+        {
+          name: 'create_path_visualization',
+          description: 'Create animated path visualizations for shortest paths, relationship chains, and graph traversals',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              nodes: {
+                type: 'array',
+                description: 'Array of Neo4j nodes',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    labels: { 
+                      type: 'array', 
+                      items: { type: 'string' },
+                      description: 'Node labels'
+                    },
+                    properties: { 
+                      type: 'object',
+                      description: 'Node properties',
+                      additionalProperties: true
+                    }
+                  },
+                  required: ['id', 'labels', 'properties'],
+                  additionalProperties: false
+                }
+              },
+              relationships: {
+                type: 'array',
+                description: 'Array of Neo4j relationships',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    type: { type: 'string' },
+                    startNodeId: { type: 'string' },
+                    endNodeId: { type: 'string' },
+                    properties: { 
+                      type: 'object',
+                      description: 'Relationship properties',
+                      additionalProperties: true
+                    }
+                  },
+                  required: ['id', 'type', 'startNodeId', 'endNodeId', 'properties'],
+                  additionalProperties: false
+                }
+              },
+              paths: {
+                type: 'array',
+                description: 'Array of paths to highlight',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    nodeIds: {
+                      type: 'array',
+                      items: { type: 'string' },
+                      description: 'Ordered array of node IDs in the path'
+                    },
+                    relationshipIds: {
+                      type: 'array',
+                      items: { type: 'string' },
+                      description: 'Ordered array of relationship IDs in the path'
+                    },
+                    color: { type: 'string', default: '#ff6b35' },
+                    weight: { type: 'number', default: 1 }
+                  },
+                  required: ['id', 'nodeIds', 'relationshipIds'],
+                  additionalProperties: false
+                }
+              },
+              title: { type: 'string', default: 'Neo4j Path Visualization' },
+              animationSpeed: { type: 'number', default: 1000 },
+              showSteps: { type: 'boolean', default: true }
+            },
+            required: ['nodes', 'relationships', 'paths']
+          }
+        },
+        {
+          name: 'create_sankey_diagram',
+          description: 'Create Sankey flow diagrams for visualizing weighted relationships and data flows',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              flows: {
+                type: 'array',
+                description: 'Array of flow data between nodes',
+                items: {
+                  type: 'object',
+                  properties: {
+                    source: { type: 'string', description: 'Source node ID' },
+                    target: { type: 'string', description: 'Target node ID' },
+                    value: { type: 'number', description: 'Flow value/weight' },
+                    label: { type: 'string', description: 'Flow label' }
+                  },
+                  required: ['source', 'target', 'value'],
+                  additionalProperties: false
+                }
+              },
+              nodes: {
+                type: 'array',
+                description: 'Array of node definitions',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string' },
+                    name: { type: 'string' },
+                    category: { type: 'string' },
+                    color: { type: 'string' }
+                  },
+                  required: ['id', 'name'],
+                  additionalProperties: false
+                }
+              },
+              title: { type: 'string', default: 'Neo4j Sankey Flow Diagram' },
+              width: { type: 'number', default: 800 },
+              height: { type: 'number', default: 600 },
+              nodeWidth: { type: 'number', default: 15 },
+              nodePadding: { type: 'number', default: 10 }
+            },
+            required: ['flows', 'nodes']
+          }
+        },
+        {
+          name: 'create_hierarchical_tree',
+          description: 'Create hierarchical tree visualizations including collapsible trees, radial trees, and sunburst diagrams',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              treeData: {
+                type: 'object',
+                description: 'Hierarchical tree structure',
+                properties: {
+                  id: { type: 'string' },
+                  name: { type: 'string' },
+                  value: { type: 'number' },
+                  children: {
+                    type: 'array',
+                    items: { type: 'object' },
+                    description: 'Child nodes (recursive structure)'
+                  },
+                  properties: {
+                    type: 'object',
+                    additionalProperties: true
+                  }
+                },
+                required: ['id', 'name'],
+                additionalProperties: true
+              },
+              visualizationType: {
+                type: 'string',
+                enum: ['tree', 'radial', 'sunburst', 'treemap'],
+                description: 'Type of hierarchical visualization'
+              },
+              title: { type: 'string', default: 'Neo4j Hierarchical Visualization' },
+              width: { type: 'number', default: 800 },
+              height: { type: 'number', default: 600 },
+              interactive: { type: 'boolean', default: true },
+              showLabels: { type: 'boolean', default: true }
+            },
+            required: ['treeData', 'visualizationType']
+          }
         }
       ]
     }));
@@ -414,6 +635,14 @@ class Neo4jVisualizerServer {
             return await this.handleVisualizationComponent(request.params.arguments);
           case 'get_d3_visualization_data':
             return await this.handleD3VisualizationData(request.params.arguments);
+          case 'create_3d_graph_network':
+            return await this.handle3DGraphNetwork(request.params.arguments);
+          case 'create_path_visualization':
+            return await this.handlePathVisualization(request.params.arguments);
+          case 'create_sankey_diagram':
+            return await this.handleSankeyDiagram(request.params.arguments);
+          case 'create_hierarchical_tree':
+            return await this.handleHierarchicalTree(request.params.arguments);
           default:
             throw new McpError(
               ErrorCode.MethodNotFound,
@@ -1839,6 +2068,882 @@ const createGraphVisualization = (container, data, width, height) => {
       .attr("cy", d => d.y);
   });
 };`;
+  }
+
+  private async handle3DGraphNetwork(args: any) {
+    const { 
+      nodes, 
+      relationships, 
+      title = '3D Neo4j Graph Network',
+      enablePhysics = true,
+      enableVR = false,
+      nodeSize = 1,
+      linkDistance = 30
+    } = args;
+
+    const componentCode = this.generate3DGraphComponent(nodes, relationships, {
+      title,
+      enablePhysics,
+      enableVR,
+      nodeSize,
+      linkDistance
+    });
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Generated 3D Graph Network visualization with ${nodes.length} nodes and ${relationships.length} relationships.\n\nReact Component Code:\n\n${componentCode}`,
+        },
+      ],
+    };
+  }
+
+  private async handlePathVisualization(args: any) {
+    const { 
+      nodes, 
+      relationships, 
+      paths,
+      title = 'Neo4j Path Visualization',
+      animationSpeed = 1000,
+      showSteps = true
+    } = args;
+
+    const componentCode = this.generatePathVisualizationComponent(nodes, relationships, paths, {
+      title,
+      animationSpeed,
+      showSteps
+    });
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Generated Path Visualization with ${paths.length} paths across ${nodes.length} nodes.\n\nReact Component Code:\n\n${componentCode}`,
+        },
+      ],
+    };
+  }
+
+  private async handleSankeyDiagram(args: any) {
+    const { 
+      flows, 
+      nodes, 
+      title = 'Neo4j Sankey Flow Diagram',
+      width = 800,
+      height = 600,
+      nodeWidth = 15,
+      nodePadding = 10
+    } = args;
+
+    const componentCode = this.generateSankeyComponent(flows, nodes, {
+      title,
+      width,
+      height,
+      nodeWidth,
+      nodePadding
+    });
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Generated Sankey Diagram with ${flows.length} flows between ${nodes.length} nodes.\n\nReact Component Code:\n\n${componentCode}`,
+        },
+      ],
+    };
+  }
+
+  private async handleHierarchicalTree(args: any) {
+    const { 
+      treeData, 
+      visualizationType,
+      title = 'Neo4j Hierarchical Visualization',
+      width = 800,
+      height = 600,
+      interactive = true,
+      showLabels = true
+    } = args;
+
+    const componentCode = this.generateHierarchicalTreeComponent(treeData, {
+      visualizationType,
+      title,
+      width,
+      height,
+      interactive,
+      showLabels
+    });
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Generated ${visualizationType} hierarchical visualization.\n\nReact Component Code:\n\n${componentCode}`,
+        },
+      ],
+    };
+  }
+
+  private generate3DGraphComponent(nodes: any[], relationships: any[], options: any): string {
+    return `
+import React, { useRef, useEffect } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Text } from '@react-three/drei';
+import * as THREE from 'three';
+
+const Node3D = ({ position, color, size, label, onClick }) => {
+  const meshRef = useRef();
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x += 0.01;
+      meshRef.current.rotation.y += 0.01;
+    }
+  });
+
+  return (
+    <group position={position}>
+      <mesh ref={meshRef} onClick={onClick}>
+        <sphereGeometry args={[size, 16, 16]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+      <Text
+        position={[0, size + 0.5, 0]}
+        fontSize={0.5}
+        color="white"
+        anchorX="center"
+        anchorY="middle"
+      >
+        {label}
+      </Text>
+    </group>
+  );
+};
+
+const Link3D = ({ start, end, color = '#999999' }) => {
+  const points = [new THREE.Vector3(...start), new THREE.Vector3(...end)];
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+  return (
+    <line geometry={geometry}>
+      <lineBasicMaterial color={color} />
+    </line>
+  );
+};
+
+const Graph3D = ({ nodes, relationships, options }) => {
+  const processedNodes = nodes.map((node, index) => ({
+    ...node,
+    position: [
+      (Math.random() - 0.5) * 20,
+      (Math.random() - 0.5) * 20,
+      (Math.random() - 0.5) * 20
+    ],
+    color: \`hsl(\${(index * 137.508) % 360}, 70%, 50%)\`,
+    size: options.nodeSize || 1
+  }));
+
+  const processedLinks = relationships.map(rel => {
+    const sourceNode = processedNodes.find(n => n.id === rel.startNodeId);
+    const targetNode = processedNodes.find(n => n.id === rel.endNodeId);
+    return {
+      ...rel,
+      start: sourceNode?.position || [0, 0, 0],
+      end: targetNode?.position || [0, 0, 0]
+    };
+  });
+
+  return (
+    <>
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} />
+      
+      {processedNodes.map((node) => (
+        <Node3D
+          key={node.id}
+          position={node.position}
+          color={node.color}
+          size={node.size}
+          label={node.properties.name || node.id}
+          onClick={() => console.log('Node clicked:', node)}
+        />
+      ))}
+      
+      {processedLinks.map((link, index) => (
+        <Link3D
+          key={index}
+          start={link.start}
+          end={link.end}
+          color="#666666"
+        />
+      ))}
+      
+      <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+    </>
+  );
+};
+
+const ${options.title.replace(/\s+/g, '')}3D = ({ data = { nodes: [], relationships: [] } }) => {
+  return (
+    <div style={{ width: '100%', height: '600px', background: '#000' }}>
+      <h2 style={{ color: 'white', textAlign: 'center', margin: '10px 0' }}>
+        ${options.title}
+      </h2>
+      <Canvas camera={{ position: [0, 0, 30], fov: 75 }}>
+        <Graph3D 
+          nodes={data.nodes || []} 
+          relationships={data.relationships || []}
+          options={${JSON.stringify(options)}}
+        />
+      </Canvas>
+      <div style={{ color: 'white', textAlign: 'center', padding: '10px' }}>
+        <p>Use mouse to rotate, zoom, and pan the 3D graph</p>
+        <p>Nodes: {data.nodes?.length || 0} | Relationships: {data.relationships?.length || 0}</p>
+      </div>
+    </div>
+  );
+};
+
+export default ${options.title.replace(/\s+/g, '')}3D;
+
+// Required dependencies:
+// npm install three @react-three/fiber @react-three/drei
+`;
+  }
+
+  private generatePathVisualizationComponent(nodes: any[], relationships: any[], paths: any[], options: any): string {
+    return `
+import React, { useEffect, useRef, useState } from 'react';
+import * as d3 from 'd3';
+
+const PathVisualization = ({ data, options }) => {
+  const svgRef = useRef();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (!data.nodes || !data.relationships || !data.paths) return;
+
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove();
+
+    const width = 800;
+    const height = 600;
+    const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+
+    // Create main group
+    const g = svg.append("g")
+      .attr("transform", \`translate(\${margin.left},\${margin.top})\`);
+
+    // Set up scales and simulation
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
+    
+    const simulation = d3.forceSimulation(data.nodes)
+      .force("link", d3.forceLink(data.relationships).id(d => d.id).distance(100))
+      .force("charge", d3.forceManyBody().strength(-300))
+      .force("center", d3.forceCenter((width - margin.left - margin.right) / 2, (height - margin.top - margin.bottom) / 2));
+
+    // Create links
+    const links = g.append("g")
+      .selectAll("line")
+      .data(data.relationships)
+      .enter().append("line")
+      .attr("class", "link")
+      .attr("stroke", "#999")
+      .attr("stroke-opacity", 0.6)
+      .attr("stroke-width", 2);
+
+    // Create nodes
+    const nodes = g.append("g")
+      .selectAll("circle")
+      .data(data.nodes)
+      .enter().append("circle")
+      .attr("class", "node")
+      .attr("r", 15)
+      .attr("fill", d => color(d.labels[0]))
+      .attr("stroke", "#fff")
+      .attr("stroke-width", 2);
+
+    // Add node labels
+    const nodeLabels = g.append("g")
+      .selectAll("text")
+      .data(data.nodes)
+      .enter().append("text")
+      .attr("class", "node-label")
+      .attr("text-anchor", "middle")
+      .attr("dy", ".35em")
+      .attr("font-size", "10px")
+      .attr("fill", "white")
+      .text(d => d.properties.name || d.id);
+
+    // Path highlighting
+    const pathGroup = g.append("g").attr("class", "paths");
+
+    data.paths.forEach((path, pathIndex) => {
+      // Create path links
+      path.relationshipIds.forEach((relId, index) => {
+        const relationship = data.relationships.find(r => r.id === relId);
+        if (relationship) {
+          pathGroup.append("line")
+            .attr("class", \`path-link path-\${pathIndex}\`)
+            .attr("stroke", path.color || "#ff6b35")
+            .attr("stroke-width", (path.weight || 1) * 4)
+            .attr("stroke-opacity", 0)
+            .attr("data-step", index);
+        }
+      });
+
+      // Create path nodes
+      path.nodeIds.forEach((nodeId, index) => {
+        const node = data.nodes.find(n => n.id === nodeId);
+        if (node) {
+          pathGroup.append("circle")
+            .attr("class", \`path-node path-\${pathIndex}\`)
+            .attr("r", 20)
+            .attr("fill", path.color || "#ff6b35")
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 3)
+            .attr("opacity", 0)
+            .attr("data-step", index);
+        }
+      });
+    });
+
+    // Animation function
+    const animatePath = (pathIndex) => {
+      const path = data.paths[pathIndex];
+      if (!path) return;
+
+      setIsAnimating(true);
+      let step = 0;
+
+      const animate = () => {
+        // Highlight current step
+        pathGroup.selectAll(\`.path-\${pathIndex}[data-step="\${step}"]\`)
+          .transition()
+          .duration(options.animationSpeed / 2)
+          .attr("opacity", 1)
+          .attr("stroke-opacity", 0.8);
+
+        step++;
+        setCurrentStep(step);
+
+        if (step < Math.max(path.nodeIds.length, path.relationshipIds.length)) {
+          setTimeout(animate, options.animationSpeed);
+        } else {
+          setIsAnimating(false);
+        }
+      };
+
+      animate();
+    };
+
+    // Update positions on simulation tick
+    simulation.on("tick", () => {
+      links
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+      nodes
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
+
+      nodeLabels
+        .attr("x", d => d.x)
+        .attr("y", d => d.y);
+
+      // Update path elements
+      data.paths.forEach((path, pathIndex) => {
+        path.relationshipIds.forEach((relId, index) => {
+          const relationship = data.relationships.find(r => r.id === relId);
+          if (relationship) {
+            pathGroup.select(\`.path-link.path-\${pathIndex}[data-step="\${index}"]\`)
+              .attr("x1", relationship.source.x)
+              .attr("y1", relationship.source.y)
+              .attr("x2", relationship.target.x)
+              .attr("y2", relationship.target.y);
+          }
+        });
+
+        path.nodeIds.forEach((nodeId, index) => {
+          const node = data.nodes.find(n => n.id === nodeId);
+          if (node) {
+            pathGroup.select(\`.path-node.path-\${pathIndex}[data-step="\${index}"]\`)
+              .attr("cx", node.x)
+              .attr("cy", node.y);
+          }
+        });
+      });
+    });
+
+    // Auto-start animation for first path
+    if (data.paths.length > 0) {
+      setTimeout(() => animatePath(0), 1000);
+    }
+
+  }, [data, options]);
+
+  const resetAnimation = () => {
+    setCurrentStep(0);
+    setIsAnimating(false);
+    const svg = d3.select(svgRef.current);
+    svg.selectAll(".path-link, .path-node")
+      .transition()
+      .duration(200)
+      .attr("opacity", 0)
+      .attr("stroke-opacity", 0);
+  };
+
+  return (
+    <div style={{ fontFamily: 'Arial, sans-serif' }}>
+      <h2 style={{ textAlign: 'center', margin: '20px 0' }}>${options.title}</h2>
+      
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <button 
+          onClick={resetAnimation}
+          disabled={isAnimating}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: isAnimating ? '#ccc' : '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: isAnimating ? 'not-allowed' : 'pointer'
+          }}
+        >
+          {isAnimating ? \`Animating... Step \${currentStep}\` : 'Reset Animation'}
+        </button>
+      </div>
+
+      <svg 
+        ref={svgRef} 
+        width={800} 
+        height={600}
+        style={{ border: '1px solid #ddd', borderRadius: '5px' }}
+      />
+
+      <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '5px' }}>
+        <h3>Path Information:</h3>
+        {data.paths?.map((path, index) => (
+          <div key={path.id} style={{ marginBottom: '10px' }}>
+            <strong style={{ color: path.color || '#ff6b35' }}>Path {index + 1}:</strong>
+            <span style={{ marginLeft: '10px' }}>
+              {path.nodeIds.length} nodes, {path.relationshipIds.length} relationships
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default PathVisualization;
+`;
+  }
+
+  private generateSankeyComponent(flows: any[], nodes: any[], options: any): string {
+    return `
+import React, { useEffect, useRef } from 'react';
+import * as d3 from 'd3';
+
+const SankeyDiagram = ({ flows, nodes, options }) => {
+  const svgRef = useRef();
+
+  useEffect(() => {
+    if (!flows || !nodes) return;
+
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove();
+
+    const { width, height, nodeWidth, nodePadding } = options;
+    const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+
+    // Create Sankey generator
+    const sankey = d3.sankey()
+      .nodeWidth(nodeWidth)
+      .nodePadding(nodePadding)
+      .extent([[margin.left, margin.top], [width - margin.right, height - margin.bottom]]);
+
+    // Prepare data
+    const sankeyData = {
+      nodes: nodes.map(d => ({ ...d })),
+      links: flows.map(d => ({
+        source: d.source,
+        target: d.target,
+        value: d.value,
+        label: d.label
+      }))
+    };
+
+    // Generate Sankey layout
+    const { nodes: sankeyNodes, links: sankeyLinks } = sankey(sankeyData);
+
+    // Color scale
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    // Create main group
+    const g = svg.append("g");
+
+    // Add title
+    svg.append("text")
+      .attr("x", width / 2)
+      .attr("y", 30)
+      .attr("text-anchor", "middle")
+      .attr("font-size", "18px")
+      .attr("font-weight", "bold")
+      .text(options.title);
+
+    // Draw links
+    const link = g.append("g")
+      .selectAll("path")
+      .data(sankeyLinks)
+      .enter().append("path")
+      .attr("d", d3.sankeyLinkHorizontal())
+      .attr("stroke", d => color(d.source.category || d.source.name))
+      .attr("stroke-width", d => Math.max(1, d.width))
+      .attr("fill", "none")
+      .attr("opacity", 0.5)
+      .on("mouseover", function(event, d) {
+        d3.select(this).attr("opacity", 0.8);
+        
+        // Show tooltip
+        const tooltip = d3.select("body").append("div")
+          .attr("class", "sankey-tooltip")
+          .style("position", "absolute")
+          .style("background", "rgba(0,0,0,0.8)")
+          .style("color", "white")
+          .style("padding", "10px")
+          .style("border-radius", "5px")
+          .style("pointer-events", "none")
+          .style("opacity", 0);
+
+        tooltip.transition().duration(200).style("opacity", 1);
+        tooltip.html(\`
+          <strong>\${d.source.name} → \${d.target.name}</strong><br/>
+          Value: \${d.value}<br/>
+          \${d.label ? \`Label: \${d.label}\` : ''}
+        \`)
+        .style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", function(event, d) {
+        d3.select(this).attr("opacity", 0.5);
+        d3.selectAll(".sankey-tooltip").remove();
+      });
+
+    // Draw nodes
+    const node = g.append("g")
+      .selectAll("rect")
+      .data(sankeyNodes)
+      .enter().append("rect")
+      .attr("x", d => d.x0)
+      .attr("y", d => d.y0)
+      .attr("height", d => d.y1 - d.y0)
+      .attr("width", d => d.x1 - d.x0)
+      .attr("fill", d => color(d.category || d.name))
+      .attr("stroke", "#000")
+      .attr("stroke-width", 1)
+      .on("mouseover", function(event, d) {
+        d3.select(this).attr("opacity", 0.8);
+        
+        // Highlight connected links
+        link.attr("opacity", l => 
+          l.source === d || l.target === d ? 0.8 : 0.2
+        );
+      })
+      .on("mouseout", function(event, d) {
+        d3.select(this).attr("opacity", 1);
+        link.attr("opacity", 0.5);
+      });
+
+    // Add node labels
+    g.append("g")
+      .selectAll("text")
+      .data(sankeyNodes)
+      .enter().append("text")
+      .attr("x", d => d.x0 < width / 2 ? d.x1 + 6 : d.x0 - 6)
+      .attr("y", d => (d.y1 + d.y0) / 2)
+      .attr("dy", "0.35em")
+      .attr("text-anchor", d => d.x0 < width / 2 ? "start" : "end")
+      .attr("font-size", "12px")
+      .text(d => d.name);
+
+    // Add value labels on nodes
+    g.append("g")
+      .selectAll("text")
+      .data(sankeyNodes)
+      .enter().append("text")
+      .attr("x", d => (d.x0 + d.x1) / 2)
+      .attr("y", d => (d.y1 + d.y0) / 2)
+      .attr("dy", "0.35em")
+      .attr("text-anchor", "middle")
+      .attr("font-size", "10px")
+      .attr("fill", "white")
+      .text(d => d.value);
+
+  }, [flows, nodes, options]);
+
+  return (
+    <div style={{ fontFamily: 'Arial, sans-serif' }}>
+      <svg 
+        ref={svgRef} 
+        width={options.width} 
+        height={options.height}
+        style={{ border: '1px solid #ddd', borderRadius: '5px' }}
+      />
+      
+      <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '5px' }}>
+        <h3>Flow Summary:</h3>
+        <p><strong>Total Flows:</strong> {flows.length}</p>
+        <p><strong>Total Nodes:</strong> {nodes.length}</p>
+        <p><strong>Total Value:</strong> {flows.reduce((sum, flow) => sum + flow.value, 0)}</p>
+      </div>
+    </div>
+  );
+};
+
+export default SankeyDiagram;
+
+// Note: This component requires d3-sankey
+// Install with: npm install d3-sankey
+`;
+  }
+
+  private generateHierarchicalTreeComponent(treeData: any, options: any): string {
+    return `
+import React, { useEffect, useRef, useState } from 'react';
+import * as d3 from 'd3';
+
+const HierarchicalTree = ({ treeData, options }) => {
+  const svgRef = useRef();
+  const [selectedNode, setSelectedNode] = useState(null);
+
+  useEffect(() => {
+    if (!treeData) return;
+
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove();
+
+    const { width, height, visualizationType, interactive, showLabels } = options;
+    const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+
+    // Create main group
+    const g = svg.append("g")
+      .attr("transform", \`translate(\${margin.left},\${margin.top})\`);
+
+    // Add title
+    svg.append("text")
+      .attr("x", width / 2)
+      .attr("y", 30)
+      .attr("text-anchor", "middle")
+      .attr("font-size", "18px")
+      .attr("font-weight", "bold")
+      .text(options.title);
+
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+
+    // Create hierarchy
+    const root = d3.hierarchy(treeData);
+    
+    if (visualizationType === 'tree') {
+      // Tree layout
+      const treeLayout = d3.tree().size([innerHeight, innerWidth]);
+      treeLayout(root);
+
+      // Draw links
+      g.selectAll(".link")
+        .data(root.links())
+        .enter().append("path")
+        .attr("class", "link")
+        .attr("d", d3.linkHorizontal()
+          .x(d => d.y)
+          .y(d => d.x))
+        .attr("fill", "none")
+        .attr("stroke", "#999")
+        .attr("stroke-width", 2);
+
+      // Draw nodes
+      const node = g.selectAll(".node")
+        .data(root.descendants())
+        .enter().append("g")
+        .attr("class", "node")
+        .attr("transform", d => \`translate(\${d.y},\${d.x})\`)
+        .style("cursor", interactive ? "pointer" : "default");
+
+      node.append("circle")
+        .attr("r", 8)
+        .attr("fill", d => d.children ? "#555" : "#999")
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 2);
+
+      if (showLabels) {
+        node.append("text")
+          .attr("dy", ".35em")
+          .attr("x", d => d.children ? -13 : 13)
+          .style("text-anchor", d => d.children ? "end" : "start")
+          .attr("font-size", "12px")
+          .text(d => d.data.name);
+      }
+
+      if (interactive) {
+        node.on("click", function(event, d) {
+          setSelectedNode(d.data);
+        });
+      }
+
+    } else if (visualizationType === 'radial') {
+      // Radial tree layout
+      const radius = Math.min(innerWidth, innerHeight) / 2;
+      const tree = d3.tree()
+        .size([2 * Math.PI, radius])
+        .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
+
+      tree(root);
+
+      // Transform to center
+      g.attr("transform", \`translate(\${width/2},\${height/2})\`);
+
+      // Draw links
+      g.selectAll(".link")
+        .data(root.links())
+        .enter().append("path")
+        .attr("class", "link")
+        .attr("d", d3.linkRadial()
+          .angle(d => d.x)
+          .radius(d => d.y))
+        .attr("fill", "none")
+        .attr("stroke", "#999")
+        .attr("stroke-width", 2);
+
+      // Draw nodes
+      const node = g.selectAll(".node")
+        .data(root.descendants())
+        .enter().append("g")
+        .attr("class", "node")
+        .attr("transform", d => \`translate(\${d.y * Math.cos(d.x - Math.PI / 2)},\${d.y * Math.sin(d.x - Math.PI / 2)})\`)
+        .style("cursor", interactive ? "pointer" : "default");
+
+      node.append("circle")
+        .attr("r", 6)
+        .attr("fill", d => d.children ? "#555" : "#999")
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 2);
+
+      if (showLabels) {
+        node.append("text")
+          .attr("dy", ".35em")
+          .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
+          .style("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+          .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
+          .attr("font-size", "10px")
+          .text(d => d.data.name);
+      }
+
+    } else if (visualizationType === 'sunburst') {
+      // Sunburst layout
+      const radius = Math.min(innerWidth, innerHeight) / 2;
+      const partition = d3.partition().size([2 * Math.PI, radius]);
+      
+      root.sum(d => d.value || 1);
+      partition(root);
+
+      g.attr("transform", \`translate(\${width/2},\${height/2})\`);
+
+      const color = d3.scaleOrdinal(d3.schemeCategory10);
+      const arc = d3.arc()
+        .startAngle(d => d.x0)
+        .endAngle(d => d.x1)
+        .innerRadius(d => d.y0)
+        .outerRadius(d => d.y1);
+
+      g.selectAll("path")
+        .data(root.descendants())
+        .enter().append("path")
+        .attr("d", arc)
+        .attr("fill", d => color(d.data.name))
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 1)
+        .style("cursor", interactive ? "pointer" : "default")
+        .on("click", interactive ? function(event, d) {
+          setSelectedNode(d.data);
+        } : null);
+
+    } else if (visualizationType === 'treemap') {
+      // Treemap layout
+      const treemap = d3.treemap().size([innerWidth, innerHeight]).padding(1);
+      
+      root.sum(d => d.value || 1);
+      treemap(root);
+
+      const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+      g.selectAll("rect")
+        .data(root.leaves())
+        .enter().append("rect")
+        .attr("x", d => d.x0)
+        .attr("y", d => d.y0)
+        .attr("width", d => d.x1 - d.x0)
+        .attr("height", d => d.y1 - d.y0)
+        .attr("fill", d => color(d.parent.data.name))
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 1)
+        .style("cursor", interactive ? "pointer" : "default")
+        .on("click", interactive ? function(event, d) {
+          setSelectedNode(d.data);
+        } : null);
+
+      if (showLabels) {
+        g.selectAll("text")
+          .data(root.leaves())
+          .enter().append("text")
+          .attr("x", d => (d.x0 + d.x1) / 2)
+          .attr("y", d => (d.y0 + d.y1) / 2)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "10px")
+          .text(d => d.data.name);
+      }
+    }
+
+  }, [treeData, options]);
+
+  return (
+    <div style={{ fontFamily: 'Arial, sans-serif' }}>
+      <svg 
+        ref={svgRef} 
+        width={options.width} 
+        height={options.height}
+        style={{ border: '1px solid #ddd', borderRadius: '5px' }}
+      />
+      
+      {selectedNode && (
+        <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '5px' }}>
+          <h3>Selected Node:</h3>
+          <p><strong>Name:</strong> {selectedNode.name}</p>
+          {selectedNode.value && <p><strong>Value:</strong> {selectedNode.value}</p>}
+          {selectedNode.properties && (
+            <div>
+              <strong>Properties:</strong>
+              <pre>{JSON.stringify(selectedNode.properties, null, 2)}</pre>
+            </div>
+          )}
+        </div>
+      )}
+      
+      <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#e9ecef', borderRadius: '5px' }}>
+        <h3>Visualization Info:</h3>
+        <p><strong>Type:</strong> {options.visualizationType}</p>
+        <p><strong>Interactive:</strong> {options.interactive ? 'Yes' : 'No'}</p>
+        <p><strong>Show Labels:</strong> {options.showLabels ? 'Yes' : 'No'}</p>
+      </div>
+    </div>
+  );
+};
+
+export default HierarchicalTree;
+`;
   }
 
   async run() {
