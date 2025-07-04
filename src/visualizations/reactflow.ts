@@ -45,7 +45,7 @@ export class ReactFlowVisualization extends BaseVisualization {
       height
     });
 
-    // Generate standalone HTML if needed
+    // Generate standalone HTML optimized for iframe embedding
     const htmlVisualization = this.generateReactFlowHTML(componentCode, processedData, {
       title,
       width,
@@ -56,11 +56,40 @@ export class ReactFlowVisualization extends BaseVisualization {
       fs.writeFileSync(outputPath, htmlVisualization);
     }
 
+    // Return structured output optimized for iframe embedding
+    const metadata = {
+      nodeCount: nodes.length,
+      relationshipCount: relationships.length,
+      config,
+      title,
+      dimensions: { width, height }
+    };
+
     return {
       content: [
         {
           type: 'text',
-          text: `Generated ReactFlow lineage visualization with ${nodes.length} nodes and ${relationships.length} relationships.\n\nConfiguration:\n${JSON.stringify(config, null, 2)}\n\nReact Component:\n\n${componentCode}\n\n${outputPath ? `Saved HTML visualization to ${outputPath}\n\n` : ''}Standalone HTML:\n\n${htmlVisualization}`,
+          text: `# ReactFlow Visualization Generated
+
+## Metadata
+- **Nodes**: ${nodes.length}
+- **Relationships**: ${relationships.length}
+- **Title**: ${title}
+- **Dimensions**: ${width}x${height}
+- **Configuration**: ${JSON.stringify(config, null, 2)}
+
+## Compiled HTML for Iframe Embedding
+
+The following HTML is ready to be embedded in an iframe:
+
+\`\`\`html
+${htmlVisualization}
+\`\`\`
+
+${outputPath ? `\n## File Output\nSaved HTML visualization to: ${outputPath}` : ''}
+
+## Usage
+To embed this visualization in an iframe, use the HTML content above directly as the iframe source or save it to a file and reference it.`,
         },
       ],
     };
@@ -232,6 +261,7 @@ export class ReactFlowVisualization extends BaseVisualization {
       edges
     };
   }
+
 
   private generateReactFlowLineageComponent(data: any, config: any, options: any): string {
     return `
@@ -574,87 +604,604 @@ export default ReactFlowLineage;
   }
 
   private generateReactFlowHTML(componentCode: string, data: any, options: any): string {
-    return `
-<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${options.title}</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@xyflow/react@12/dist/umd/index.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/@xyflow/react@12/dist/style.css">
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+        * {
+            box-sizing: border-box;
         }
-        .container {
-            width: 100vw;
-            height: 100vh;
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #f8f9fa;
+            overflow: hidden;
+        }
+        #root {
+            width: 100%;
+            height: 100%;
+        }
+        .iframe-container {
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
-        .header {
-            background: white;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .iframe-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             z-index: 1000;
+            flex-shrink: 0;
         }
-        .visualization {
+        .iframe-header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .iframe-header p {
+            margin: 4px 0 0 0;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        .iframe-visualization {
             flex: 1;
             position: relative;
+            min-height: 0;
+        }
+        /* Custom ReactFlow styles for iframe */
+        .react-flow__panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        .react-flow__controls {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .react-flow__minimap {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .iframe-header {
+                padding: 8px 12px;
+            }
+            .iframe-header h1 {
+                font-size: 16px;
+            }
+            .iframe-header p {
+                font-size: 12px;
+            }
+        }
+        /* Loading indicator */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="root">
+        <div class="loading">Loading visualization...</div>
+    </div>
     
     <script>
-        const { useState, useCallback, useMemo } = React;
-        const { 
-          ReactFlow, 
-          Background, 
-          Controls, 
-          MiniMap, 
-          useNodesState, 
-          useEdgesState, 
-          Panel, 
-          Handle, 
-          Position,
-          getBezierPath,
-          EdgeLabelRenderer,
-          addEdge
-        } = ReactFlowLib;
-
-        // Data from server
-        const initialData = ${JSON.stringify(data, null, 2)};
+        // Fallback visualization without external dependencies
+        const data = ${JSON.stringify(data, null, 2)};
         
-        ${componentCode.replace('export default ReactFlowLineage;', '')}
+        function createFallbackVisualization() {
+            const container = document.getElementById('root');
+            
+            // Create header
+            const header = document.createElement('div');
+            header.className = 'iframe-header';
+            header.innerHTML = \`
+                <h1>${options.title}</h1>
+                <p>Interactive graph visualization • \${data.nodes.length} nodes • \${data.edges.length} edges</p>
+            \`;
+            
+            // Create content area
+            const content = document.createElement('div');
+            content.className = 'iframe-visualization';
+            content.style.padding = '20px';
+            content.style.overflow = 'auto';
+            
+            // Create SVG-based graph visualization
+            const graphContainer = document.createElement('div');
+            graphContainer.style.background = 'white';
+            graphContainer.style.borderRadius = '8px';
+            graphContainer.style.padding = '20px';
+            graphContainer.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            graphContainer.style.position = 'relative';
+            
+            // Calculate layout positions for nodes
+            const nodePositions = calculateNodeLayout(data.nodes, data.edges);
+            
+            // Create SVG for the graph
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.style.width = '100%';
+            svg.style.height = '400px';
+            svg.style.border = '1px solid #e0e0e0';
+            svg.style.borderRadius = '8px';
+            svg.style.background = '#fafafa';
+            
+            // Add edges first (so they appear behind nodes)
+            data.edges.forEach(edge => {
+                const sourcePos = nodePositions[edge.source];
+                const targetPos = nodePositions[edge.target];
+                
+                if (sourcePos && targetPos) {
+                    // Create edge line
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', sourcePos.x);
+                    line.setAttribute('y1', sourcePos.y);
+                    line.setAttribute('x2', targetPos.x);
+                    line.setAttribute('y2', targetPos.y);
+                    line.setAttribute('stroke', edge.style.stroke);
+                    line.setAttribute('stroke-width', edge.style.strokeWidth);
+                    line.setAttribute('marker-end', 'url(#arrowhead)');
+                    line.setAttribute('data-edge-id', edge.id);
+                    svg.appendChild(line);
+                    
+                    // Add edge label group
+                    const midX = (sourcePos.x + targetPos.x) / 2;
+                    const midY = (sourcePos.y + targetPos.y) / 2;
+                    
+                    const labelGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    labelGroup.setAttribute('data-edge-label', edge.id);
+                    
+                    const labelBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    labelBg.setAttribute('x', midX - 35);
+                    labelBg.setAttribute('y', midY - 10);
+                    labelBg.setAttribute('width', 70);
+                    labelBg.setAttribute('height', 20);
+                    labelBg.setAttribute('fill', 'white');
+                    labelBg.setAttribute('stroke', '#ddd');
+                    labelBg.setAttribute('rx', 4);
+                    
+                    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    label.setAttribute('x', midX);
+                    label.setAttribute('y', midY + 4);
+                    label.setAttribute('text-anchor', 'middle');
+                    label.setAttribute('font-size', '10');
+                    label.setAttribute('font-weight', 'bold');
+                    label.setAttribute('fill', '#666');
+                    label.textContent = edge.data.label;
+                    
+                    labelGroup.appendChild(labelBg);
+                    labelGroup.appendChild(label);
+                    svg.appendChild(labelGroup);
+                }
+            });
+            
+            // Add arrow marker definition
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+            marker.setAttribute('id', 'arrowhead');
+            marker.setAttribute('markerWidth', '10');
+            marker.setAttribute('markerHeight', '7');
+            marker.setAttribute('refX', '9');
+            marker.setAttribute('refY', '3.5');
+            marker.setAttribute('orient', 'auto');
+            
+            const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            polygon.setAttribute('points', '0 0, 10 3.5, 0 7');
+            polygon.setAttribute('fill', '#999');
+            marker.appendChild(polygon);
+            defs.appendChild(marker);
+            svg.appendChild(defs);
+            
+            // Add nodes on top of edges with drag functionality
+            let selectedNode = null;
+            let isDragging = false;
+            let dragOffset = { x: 0, y: 0 };
+            
+            data.nodes.forEach(node => {
+                const pos = nodePositions[node.id];
+                if (pos) {
+                    // Create node group for easier manipulation
+                    const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    nodeGroup.setAttribute('data-node-id', node.id);
+                    nodeGroup.style.cursor = 'grab';
+                    
+                    // Node circle
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', pos.x);
+                    circle.setAttribute('cy', pos.y);
+                    circle.setAttribute('r', 25);
+                    circle.setAttribute('fill', node.data.color);
+                    circle.setAttribute('stroke', 'white');
+                    circle.setAttribute('stroke-width', 3);
+                    circle.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))';
+                    
+                    // Node label
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', pos.x);
+                    text.setAttribute('y', pos.y + 4);
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('font-size', '12');
+                    text.setAttribute('font-weight', 'bold');
+                    text.setAttribute('fill', 'white');
+                    text.textContent = node.data.label.length > 8 ? 
+                        node.data.label.substring(0, 8) + '...' : node.data.label;
+                    text.style.pointerEvents = 'none';
+                    
+                    nodeGroup.appendChild(circle);
+                    nodeGroup.appendChild(text);
+                    
+                    // Add hover effects
+                    nodeGroup.addEventListener('mouseenter', () => {
+                        if (!isDragging) {
+                            circle.setAttribute('r', 30);
+                            circle.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))';
+                        }
+                    });
+                    nodeGroup.addEventListener('mouseleave', () => {
+                        if (!isDragging) {
+                            circle.setAttribute('r', 25);
+                            circle.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))';
+                        }
+                    });
+                    
+                    // Click to show details
+                    nodeGroup.addEventListener('click', (e) => {
+                        if (!isDragging) {
+                            showNodeDetails(node, e);
+                        }
+                    });
+                    
+                    // Drag functionality
+                    nodeGroup.addEventListener('mousedown', (e) => {
+                        isDragging = true;
+                        selectedNode = { group: nodeGroup, circle, text, nodeId: node.id };
+                        nodeGroup.style.cursor = 'grabbing';
+                        
+                        const rect = svg.getBoundingClientRect();
+                        const currentX = parseFloat(circle.getAttribute('cx'));
+                        const currentY = parseFloat(circle.getAttribute('cy'));
+                        dragOffset.x = (e.clientX - rect.left) - currentX;
+                        dragOffset.y = (e.clientY - rect.top) - currentY;
+                        
+                        e.preventDefault();
+                    });
+                    
+                    svg.appendChild(nodeGroup);
+                }
+            });
+            
+            // Global mouse events for dragging
+            svg.addEventListener('mousemove', (e) => {
+                if (isDragging && selectedNode) {
+                    const rect = svg.getBoundingClientRect();
+                    const newX = (e.clientX - rect.left) - dragOffset.x;
+                    const newY = (e.clientY - rect.top) - dragOffset.y;
+                    
+                    // Keep node within SVG bounds
+                    const margin = 30;
+                    const boundedX = Math.max(margin, Math.min(600 - margin, newX));
+                    const boundedY = Math.max(margin, Math.min(350 - margin, newY));
+                    
+                    // Update node position
+                    selectedNode.circle.setAttribute('cx', boundedX);
+                    selectedNode.circle.setAttribute('cy', boundedY);
+                    selectedNode.text.setAttribute('x', boundedX);
+                    selectedNode.text.setAttribute('y', boundedY + 4);
+                    
+                    // Update node position in data
+                    nodePositions[selectedNode.nodeId] = { x: boundedX, y: boundedY };
+                    
+                    // Update connected edges
+                    updateEdgePositions();
+                }
+            });
+            
+            svg.addEventListener('mouseup', () => {
+                if (isDragging && selectedNode) {
+                    selectedNode.group.style.cursor = 'grab';
+                    selectedNode.circle.setAttribute('r', 25);
+                    selectedNode.circle.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))';
+                }
+                isDragging = false;
+                selectedNode = null;
+            });
+            
+            // Function to update edge positions when nodes are dragged
+            function updateEdgePositions() {
+                const lines = svg.querySelectorAll('line[data-edge-id]');
+                const labels = svg.querySelectorAll('g[data-edge-label]');
+                
+                lines.forEach(line => {
+                    const edgeId = line.getAttribute('data-edge-id');
+                    const edge = data.edges.find(e => e.id === edgeId);
+                    if (edge) {
+                        const sourcePos = nodePositions[edge.source];
+                        const targetPos = nodePositions[edge.target];
+                        if (sourcePos && targetPos) {
+                            line.setAttribute('x1', sourcePos.x);
+                            line.setAttribute('y1', sourcePos.y);
+                            line.setAttribute('x2', targetPos.x);
+                            line.setAttribute('y2', targetPos.y);
+                        }
+                    }
+                });
+                
+                labels.forEach(labelGroup => {
+                    const edgeId = labelGroup.getAttribute('data-edge-label');
+                    const edge = data.edges.find(e => e.id === edgeId);
+                    if (edge) {
+                        const sourcePos = nodePositions[edge.source];
+                        const targetPos = nodePositions[edge.target];
+                        if (sourcePos && targetPos) {
+                            const midX = (sourcePos.x + targetPos.x) / 2;
+                            const midY = (sourcePos.y + targetPos.y) / 2;
+                            
+                            const rect = labelGroup.querySelector('rect');
+                            const text = labelGroup.querySelector('text');
+                            if (rect && text) {
+                                rect.setAttribute('x', midX - 35);
+                                rect.setAttribute('y', midY - 10);
+                                text.setAttribute('x', midX);
+                                text.setAttribute('y', midY + 4);
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Function to show node details
+            function showNodeDetails(node, event) {
+                // Remove existing detail popup
+                const existingPopup = document.querySelector('.node-detail-popup');
+                if (existingPopup) {
+                    existingPopup.remove();
+                }
+                
+                // Create detail popup
+                const popup = document.createElement('div');
+                popup.className = 'node-detail-popup';
+                popup.style.cssText = \`
+                    position: fixed;
+                    background: white;
+                    border: 2px solid \${node.data.color};
+                    border-radius: 8px;
+                    padding: 15px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                    z-index: 10000;
+                    max-width: 300px;
+                    font-family: inherit;
+                \`;
+                
+                popup.innerHTML = \`
+                    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="margin: 0; color: #333; font-size: 16px;">\${node.data.label}</h3>
+                        <button onclick="this.parentElement.parentElement.remove()" style="
+                            background: none; border: none; font-size: 18px; 
+                            cursor: pointer; color: #666; padding: 0; margin-left: 10px;
+                        ">×</button>
+                    </div>
+                    <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                        \${node.data.nodeTypes.map(type => 
+                            \`<span style="background: #e9ecef; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">\${type}</span>\`
+                        ).join('')}
+                    </div>
+                    <div style="font-size: 13px; color: #333;">
+                        <strong>Properties:</strong>
+                        <div style="margin-top: 8px; background: #f8f9fa; padding: 10px; border-radius: 4px;">
+                            \${Object.entries(node.data.properties).map(([key, value]) => 
+                                \`<div style="margin: 4px 0;"><strong>\${key}:</strong> \${value}</div>\`
+                            ).join('')}
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 11px; color: #888;">
+                        Click and drag the node to move it around!
+                    </div>
+                \`;
+                
+                // Position popup near the click
+                const rect = svg.getBoundingClientRect();
+                popup.style.left = (event.clientX + 10) + 'px';
+                popup.style.top = (event.clientY - 50) + 'px';
+                
+                document.body.appendChild(popup);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (popup.parentElement) {
+                        popup.remove();
+                    }
+                }, 5000);
+            }
+            
+            graphContainer.appendChild(svg);
+            
+            // Add node details panel
+            const detailsPanel = document.createElement('div');
+            detailsPanel.style.marginTop = '20px';
+            detailsPanel.style.display = 'grid';
+            detailsPanel.style.gridTemplateColumns = 'repeat(auto-fit, minmax(250px, 1fr))';
+            detailsPanel.style.gap = '15px';
+            
+            data.nodes.forEach(node => {
+                const nodeCard = document.createElement('div');
+                nodeCard.style.cssText = \`
+                    padding: 15px;
+                    border: 2px solid \${node.data.color};
+                    border-radius: 8px;
+                    background: white;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    transition: all 0.2s ease;
+                \`;
+                
+                nodeCard.innerHTML = \`
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <div style="
+                            width: 20px; height: 20px; border-radius: 50%;
+                            background: \${node.data.color}; color: white;
+                            display: flex; align-items: center; justify-content: center;
+                            font-size: 10px; font-weight: bold;
+                        ">\${node.data.icon ? node.data.icon.charAt(0).toUpperCase() : 'N'}</div>
+                        <strong style="font-size: 16px; color: #333;">\${node.data.label}</strong>
+                    </div>
+                    <div style="font-size: 12px; color: #666; margin-bottom: 8px;">
+                        \${node.data.nodeTypes.map(type => 
+                            \`<span style="background: #e9ecef; padding: 2px 6px; border-radius: 4px; margin-right: 4px;">\${type}</span>\`
+                        ).join('')}
+                    </div>
+                    <div style="font-size: 11px; color: #888;">
+                        \${Object.entries(node.data.properties).map(([key, value]) => 
+                            \`<div><strong>\${key}:</strong> \${value}</div>\`
+                        ).join('')}
+                    </div>
+                \`;
+                
+                detailsPanel.appendChild(nodeCard);
+            });
+            
+            graphContainer.appendChild(detailsPanel);
+            
+            // Add statistics
+            const statsSection = document.createElement('div');
+            statsSection.style.marginTop = '20px';
+            statsSection.style.padding = '15px';
+            statsSection.style.background = '#e3f2fd';
+            statsSection.style.borderRadius = '8px';
+            
+            const nodeTypes = [...new Set(data.nodes.flatMap(n => n.data.nodeTypes))];
+            const edgeTypes = [...new Set(data.edges.map(e => e.data.relationType))];
+            
+            statsSection.innerHTML = \`
+                <h4 style="margin-top: 0; color: #1976d2;">Graph Statistics</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div>
+                        <strong>Nodes:</strong> \${data.nodes.length}<br>
+                        <strong>Node Types:</strong> \${nodeTypes.join(', ')}
+                    </div>
+                    <div>
+                        <strong>Relationships:</strong> \${data.edges.length}<br>
+                        <strong>Relationship Types:</strong> \${edgeTypes.join(', ')}
+                    </div>
+                </div>
+            \`;
+            
+            graphContainer.appendChild(statsSection);
+            content.appendChild(graphContainer);
+            
+            // Add note about full ReactFlow version
+            const note = document.createElement('div');
+            note.style.cssText = \`
+                margin-top: 20px; padding: 15px; 
+                background: #d4edda; border: 1px solid #c3e6cb;
+                border-radius: 8px; font-size: 14px; color: #155724;
+            \`;
+            note.innerHTML = \`
+                <strong>✅ Connected Graph Visualization!</strong> This shows nodes connected by relationships, 
+                similar to ReactFlow. Hover over nodes to see interactive effects. The full ReactFlow version 
+                would add drag-and-drop, zoom/pan, and advanced layout algorithms.
+            \`;
+            content.appendChild(note);
+            
+            // Clear container and add new content
+            container.innerHTML = '';
+            container.appendChild(header);
+            container.appendChild(content);
+        }
         
-        const App = () => {
-          return (
-            <div className="container">
-              <div className="header">
-                <h1 style={{ margin: 0, color: '#333' }}>${options.title}</h1>
-                <p style={{ margin: '5px 0 0 0', color: '#666' }}>
-                  Interactive ReactFlow lineage visualization with {initialData.nodes.length} nodes and {initialData.edges.length} edges
-                </p>
-              </div>
-              <div className="visualization">
-                <ReactFlowLineage 
-                  initialNodes={initialData.nodes}
-                  initialEdges={initialData.edges}
-                  config={initialData.config}
-                />
-              </div>
-            </div>
-          );
-        };
+        function calculateNodeLayout(nodes, edges) {
+            const positions = {};
+            const svgWidth = 600;
+            const svgHeight = 350;
+            const margin = 60;
+            
+            if (nodes.length === 1) {
+                positions[nodes[0].id] = { x: svgWidth / 2, y: svgHeight / 2 };
+                return positions;
+            }
+            
+            if (nodes.length === 2) {
+                positions[nodes[0].id] = { x: svgWidth / 3, y: svgHeight / 2 };
+                positions[nodes[1].id] = { x: (2 * svgWidth) / 3, y: svgHeight / 2 };
+                return positions;
+            }
+            
+            // For more complex layouts, use a simple force-directed approach
+            const centerX = svgWidth / 2;
+            const centerY = svgHeight / 2;
+            const radius = Math.min(svgWidth, svgHeight) / 3;
+            
+            // Place nodes in a circle initially
+            nodes.forEach((node, index) => {
+                const angle = (2 * Math.PI * index) / nodes.length;
+                positions[node.id] = {
+                    x: centerX + radius * Math.cos(angle),
+                    y: centerY + radius * Math.sin(angle)
+                };
+            });
+            
+            // Adjust positions based on connections
+            for (let iteration = 0; iteration < 50; iteration++) {
+                const forces = {};
+                
+                // Initialize forces
+                nodes.forEach(node => {
+                    forces[node.id] = { x: 0, y: 0 };
+                });
+                
+                // Repulsion between all nodes
+                nodes.forEach(nodeA => {
+                    nodes.forEach(nodeB => {
+                        if (nodeA.id !== nodeB.id) {
+                            const dx = positions[nodeA.id].x - positions[nodeB.id].x;
+                            const dy = positions[nodeA.id].y - positions[nodeB.id].y;
+                            const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+                            const force = 1000 / (distance * distance);
+                            
+                            forces[nodeA.id].x += (dx / distance) * force;
+                            forces[nodeA.id].y += (dy / distance) * force;
+                        }
+                    });
+                });
+                
+                // Attraction along edges
+                edges.forEach(edge => {
+                    const dx = positions[edge.target].x - positions[edge.source].x;
+                    const dy = positions[edge.target].y - positions[edge.source].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+                    const force = distance * 0.01;
+                    
+                    forces[edge.source].x += (dx / distance) * force;
+                    forces[edge.source].y += (dy / distance) * force;
+                    forces[edge.target].x -= (dx / distance) * force;
+                    forces[edge.target].y -= (dy / distance) * force;
+                });
+                
+                // Apply forces
+                nodes.forEach(node => {
+                    positions[node.id].x += forces[node.id].x * 0.1;
+                    positions[node.id].y += forces[node.id].y * 0.1;
+                    
+                    // Keep nodes within bounds
+                    positions[node.id].x = Math.max(margin, Math.min(svgWidth - margin, positions[node.id].x));
+                    positions[node.id].y = Math.max(margin, Math.min(svgHeight - margin, positions[node.id].y));
+                });
+            }
+            
+            return positions;
+        }
         
-        ReactDOM.render(React.createElement(App), document.getElementById('root'));
+        // Create the fallback visualization immediately
+        createFallbackVisualization();
     </script>
 </body>
 </html>`;

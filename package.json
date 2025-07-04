@@ -1,6 +1,6 @@
 {
   "name": "mcp-neo4j-visualizer",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "A Model Context Protocol server to visualize neo4j query results",
   "private": false,
   "type": "module",
